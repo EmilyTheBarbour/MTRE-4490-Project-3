@@ -6,7 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #General Variables
-Verify_Step = 21
+Verify_Step = 201   #sets how dense the predicted grid is
+Epo = 15000         #sets number of training cycles
+Batch = 10          #sets how many samples are used in training
+nodes = 128         #sets number of nodes in each hidden layer
+act = 'selu'        #sets activation type for all hidden layers
 
 #Training Data
 X = np.array([[1, 5],
@@ -22,20 +26,19 @@ X = np.array([[1, 5],
 
 X_norm = np.divide((X-0),(10-0)) #works since range is 0 to 10
 
-#[1, 0] = red 
-#[0, 1] = blue
+#[1, 0] = red, [0, 1] = blue
 R = np.append(np.tile(np.array([1, 0]), [5, 1]), np.tile(np.array([0, 1]), [5, 1]), axis=0)
 
 #Set Up Network
 model = models.Sequential()
-model.add(layers.Dense(64, activation='relu', input_shape=(2,)))
-model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(nodes, activation=act, input_shape=(2,)))
+model.add(layers.Dense(nodes, activation=act))
+model.add(layers.Dense(nodes, activation=act))
 model.add(layers.Dense(2, activation='softmax'))
 model.compile(optimizer='sgd', loss='mse')
 
 #Train Network
-model.fit(X_norm, R, epochs=200, batch_size=10)
+model.fit(X_norm, R, epochs=Epo, batch_size=Batch)
 model.save('color_model.h5')
 
 #verify network
@@ -53,17 +56,16 @@ x_y_val = np.divide((np.concatenate(x_y_val, axis=0)-0),(10-0))
 
 #test network
 model = load_model('color_model.h5')
-#z_pre = model.predict(x_y_val)
 
 #plot result
-
+plt.figure(figsize=[3.7,3.7])
 for i in range(x_y_val.shape[0]):
     Location = x_y_val[i]
     Prediction = model.predict(np.array([Location]))
     if Prediction[0][0] > Prediction[0][1]:
-        plt.plot(np.multiply(Location[0], 10), np.multiply(Location[1], 10), 'r.')
+        plt.plot(np.multiply(Location[0], 10), np.multiply(Location[1], 10), 'r,')
     else:
-        plt.plot(np.multiply(Location[0], 10), np.multiply(Location[1], 10), 'b.')
+        plt.plot(np.multiply(Location[0], 10), np.multiply(Location[1], 10), 'b,')
 
 #plot training data
 for i in range(10):
