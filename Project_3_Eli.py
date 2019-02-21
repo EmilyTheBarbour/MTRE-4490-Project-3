@@ -81,9 +81,3 @@ plt.xlim(0,10)
 plt.yticks(np.arange(0,11))
 plt.ylim(0,10)
 plt.show()
-    
-    
-
-
-
-
